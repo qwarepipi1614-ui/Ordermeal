@@ -422,23 +422,73 @@
     <div id="toast" class="toast">操作成功！</div>
 
     <script>
-        // Initial mocked data based on Google Sheet structure
-        let orders = [
-            { id: 1, name: '高念平', status: 'OK', main: '油蔥舒肥雞霸氣會議餐盒', drink: '原片初露青茶 無糖微冰', memo: '冬天不洗澡也要洗衣服吧' },
-            { id: 2, name: '游國楷', status: 'OK', main: '油蔥舒肥雞霸氣會議餐盒', drink: '原片初露青茶 無糖微冰', memo: '' },
-            { id: 3, name: '謝楷評', status: 'OK', main: '招牌椒麻豬排霸氣會議餐盒', drink: '珍珠大正紅茶拿鐵微糖微冰', memo: '' },
-            { id: 4, name: '陳春惠', status: 'OK', main: '原味椒鹽炸雞霸氣會議餐盒', drink: '桂香青檸粉粿 無糖微冰', memo: '' },
-            { id: 7, name: '李佳馨', status: 'OK', main: '原味椒鹽炸雞霸氣會議餐盒', drink: '桂香青檸粉粿 無糖微冰', memo: '都AI' }
-        ];
-
-        let currentId = 8; // Next available ID
+        // Data parsed from Google Sheets
+        let orders = [];
+        let currentId = 1; // Next available ID
         let editingId = null;
+
+        const sheetUrl = "https://docs.google.com/spreadsheets/d/1pHB-N2xeMXa7VyG6Ha5VzH0l0NeMu6r0Nt-G39NQVNU/gviz/tq?tqx=out:json&gid=323436774";
+        const mainsList = ['油蔥舒肥雞霸氣會議餐盒', '爺爺蒲燒魚霸氣會議餐盒', '招牌椒麻豬排霸氣會議餐盒', '原味椒鹽炸雞霸氣會議餐盒', '素食'];
+        const drinksList = ['桂香青檸粉粿 無糖微冰', '珍珠大正紅茶拿鐵微糖微冰', '原片初露青茶 無糖微冰'];
 
         const tableBody = document.getElementById('tableBody');
         const emptyState = document.getElementById('emptyState');
         const orderModal = document.getElementById('orderModal');
         const orderForm = document.getElementById('orderForm');
         const modalTitle = document.getElementById('modalTitle');
+
+        async function syncGoogleSheet() {
+            try {
+                showToast('正在同步雲端資料...', 2000);
+                const response = await fetch(sheetUrl);
+                const text = await response.text();
+
+                // Extract JSON from response
+                const jsonString = text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1);
+                const data = JSON.parse(jsonString);
+
+                const newOrders = [];
+                let rowId = 1;
+
+                // Parse rows starting from row 2 (skipping headers)
+                for (let i = 2; i < data.table.rows.length; i++) {
+                    const cells = data.table.rows[i].c;
+                    if (!cells || !cells[1] || !cells[1].v) continue;
+
+                    const name = cells[1].v;
+                    if (name === '總計' || typeof name !== 'string') continue;
+
+                    const status = (cells[2] && cells[2].v) ? cells[2].v : '';
+
+                    let main = '';
+                    for (let m = 0; m < 5; m++) {
+                        if (cells[3 + m] && cells[3 + m].v) { main = mainsList[m]; break; }
+                    }
+
+                    let drink = '';
+                    for (let d = 0; d < 3; d++) {
+                        if (cells[8 + d] && cells[8 + d].v) { drink = drinksList[d]; break; }
+                    }
+
+                    let memo = '';
+                    for (let mIdx = 14; mIdx < cells.length; mIdx++) {
+                        if (cells[mIdx] && cells[mIdx].v && typeof cells[mIdx].v === 'string' && cells[mIdx].v !== 'OK') {
+                            memo = cells[mIdx].v;
+                        }
+                    }
+
+                    newOrders.push({ id: rowId++, name, status, main, drink, memo });
+                }
+
+                orders = newOrders;
+                currentId = rowId;
+                renderTable();
+                showToast('✅ 雲端資料同步完成！', 3000);
+            } catch (error) {
+                console.error("同步失敗", error);
+                showToast('❌ 同步失敗，讀取雲端表單發生錯誤', 3000);
+            }
+        }
 
         function renderTable() {
             tableBody.innerHTML = '';
@@ -537,17 +587,17 @@
             }
         }
 
-        function showToast(message) {
+        function showToast(message, duration = 3000) {
             const toast = document.getElementById('toast');
             toast.textContent = message;
             toast.classList.add('show');
             setTimeout(() => {
                 toast.classList.remove('show');
-            }, 3000);
+            }, duration);
         }
 
-        // Initialize display
-        renderTable();
+        // Initialize display and sync automatically
+        syncGoogleSheet();
     </script>
 </body>
 
