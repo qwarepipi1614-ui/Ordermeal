@@ -337,7 +337,7 @@
         <header>
             <div class="title-area">
                 <h1><i class="fas fa-utensils"></i> OrderMeal 管理後台</h1>
-                <p>2/6 (五) 點餐統計與維護</p>
+                <p>1/13 (二) 點餐統計與維護</p>
             </div>
             <div class="header-actions" style="display: flex; gap: 1rem; align-items: center;">
                 <a href="https://github.com/qwarepipi1614-ui" target="_blank" class="btn"
@@ -395,10 +395,10 @@
                     <label for="mainDish">主餐選項 *</label>
                     <select id="mainDish" class="form-control" required>
                         <option value="" disabled selected>請選擇主餐</option>
-                        <option value="油蔥舒肥雞霸氣會議餐盒">油蔥舒肥雞霸氣會議餐盒</option>
-                        <option value="爺爺蒲燒魚霸氣會議餐盒">爺爺蒲燒魚霸氣會議餐盒</option>
-                        <option value="招牌椒麻豬排霸氣會議餐盒">招牌椒麻豬排霸氣會議餐盒</option>
-                        <option value="原味椒鹽炸雞霸氣會議餐盒">原味椒鹽炸雞霸氣會議餐盒</option>
+                        <option value="辣炒年糕雞">辣炒年糕雞</option>
+                        <option value="甘醬蒜味雞">甘醬蒜味雞</option>
+                        <option value="泡菜炒豬肉">泡菜炒豬肉</option>
+                        <option value="甜辣洋釀雞">甜辣洋釀雞</option>
                         <option value="素食">素食</option>
                     </select>
                 </div>
@@ -406,9 +406,9 @@
                     <label for="drinkSelect">飲料選項</label>
                     <select id="drinkSelect" class="form-control">
                         <option value="無">無</option>
-                        <option value="桂香青檸粉粿 無糖微冰">桂香青檸粉粿 無糖微冰</option>
-                        <option value="珍珠大正紅茶拿鐵微糖微冰">珍珠大正紅茶拿鐵 微糖微冰</option>
-                        <option value="原片初露青茶 無糖微冰">原片初露青茶 無糖微冰</option>
+                        <option value="3%金萱茶王 無糖微冰">3%金萱茶王 無糖微冰</option>
+                        <option value="3%珍粿凍茶王 無糖微冰">3%珍粿凍茶王 無糖微冰</option>
+                        <option value="萱玉紅奶茶 半糖微冰">萱玉紅奶茶 半糖微冰</option>
                     </select>
                 </div>
                 <div class="form-group">
@@ -431,9 +431,9 @@
         let currentId = 1; // Next available ID
         let editingId = null;
 
-        const sheetUrl = "https://docs.google.com/spreadsheets/d/1pHB-N2xeMXa7VyG6Ha5VzH0l0NeMu6r0Nt-G39NQVNU/gviz/tq?tqx=out:json&gid=323436774";
-        const mainsList = ['油蔥舒肥雞霸氣會議餐盒', '爺爺蒲燒魚霸氣會議餐盒', '招牌椒麻豬排霸氣會議餐盒', '原味椒鹽炸雞霸氣會議餐盒', '素食'];
-        const drinksList = ['桂香青檸粉粿 無糖微冰', '珍珠大正紅茶拿鐵微糖微冰', '原片初露青茶 無糖微冰'];
+        const sheetUrl = "https://docs.google.com/spreadsheets/d/13_VA6wV6EmCdzkGbct8fOt2ta1uO7M2H_n385_M8T6I/gviz/tq?tqx=out:json&gid=0";
+        const mainsList = ['辣炒年糕雞', '甘醬蒜味雞', '泡菜炒豬肉', '甜辣洋釀雞', '素食'];
+        const drinksList = ['3%金萱茶王 無糖微冰', '3%珍粿凍茶王 無糖微冰', '萱玉紅奶茶 半糖微冰'];
 
         const tableBody = document.getElementById('tableBody');
         const emptyState = document.getElementById('emptyState');
