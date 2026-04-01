@@ -360,10 +360,8 @@
                     <tr>
                         <th>編號</th>
                         <th>姓名</th>
-                        <th>狀態</th>
-                        <th>主餐 (四選一/素食)</th>
-                        <th>飲料 (三選一)</th>
-                        <th>備註</th>
+                        <th>品項</th>
+                        <th>飲料</th>
                         <th>操作</th>
                     </tr>
                 </thead>
@@ -392,9 +390,9 @@
                     <input type="text" id="memberName" class="form-control" required placeholder="請輸入姓名">
                 </div>
                 <div class="form-group">
-                    <label for="mainDish">主餐選項 *</label>
+                    <label for="mainDish">品項選項 *</label>
                     <select id="mainDish" class="form-control" required>
-                        <option value="" disabled selected>請選擇主餐</option>
+                        <option value="" disabled selected>請選擇品項</option>
                         <option value="辣炒年糕雞">辣炒年糕雞</option>
                         <option value="甘醬蒜味雞">甘醬蒜味雞</option>
                         <option value="泡菜炒豬肉">泡菜炒豬肉</option>
@@ -410,10 +408,6 @@
                         <option value="3%珍粿凍茶王 無糖微冰">3%珍粿凍茶王 無糖微冰</option>
                         <option value="萱玉紅奶茶 半糖微冰">萱玉紅奶茶 半糖微冰</option>
                     </select>
-                </div>
-                <div class="form-group">
-                    <label for="orderMemo">備註</label>
-                    <input type="text" id="orderMemo" class="form-control" placeholder="個人特殊需求 (選填)">
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" onclick="closeModal()">取消</button>
@@ -465,7 +459,7 @@
                     const main = (cells[2] && cells[2].v) ? cells[2].v : '';
                     const drink = (cells[3] && cells[3].v) ? cells[3].v : '';
 
-                    newOrders.push({ id: rowId++, name, status: 'OK', main, drink, memo: '' });
+                    newOrders.push({ id: rowId++, name, main, drink });
                 }
 
                 orders = newOrders;
@@ -495,10 +489,8 @@
                 tr.innerHTML = `
                     <td>#${order.id}</td>
                     <td><strong>${order.name}</strong></td>
-                    <td><span class="badge badge-ok">${order.status}</span></td>
                     <td>${order.main}</td>
                     <td>${order.drink || '無'}</td>
-                    <td>${order.memo || '-'}</td>
                     <td class="action-btns">
                         <button class="btn btn-edit" onclick="editOrder(${order.id})" title="編輯">
                             <i class="fas fa-edit"></i>
@@ -519,7 +511,6 @@
                 document.getElementById('memberName').value = order.name;
                 document.getElementById('mainDish').value = order.main;
                 document.getElementById('drinkSelect').value = order.drink || '無';
-                document.getElementById('orderMemo').value = order.memo;
                 modalTitle.innerHTML = '<i class="fas fa-edit"></i> 編輯訂單';
             } else {
                 orderForm.reset();
@@ -539,12 +530,11 @@
             const name = document.getElementById('memberName').value;
             const main = document.getElementById('mainDish').value;
             const drink = document.getElementById('drinkSelect').value;
-            const memo = document.getElementById('orderMemo').value;
 
             if (editingId) {
                 const index = orders.findIndex(o => o.id === editingId);
                 if (index !== -1) {
-                    orders[index] = { ...orders[index], name, main, drink, memo };
+                    orders[index] = { ...orders[index], name, main, drink };
                     showToast('訂單已更新！(注意: 目前修改不溯及雲端)');
                 }
                 renderTable();
@@ -560,16 +550,14 @@
                         method: 'POST',
                         mode: 'no-cors',
                         headers: { 'Content-Type': 'text/plain' },
-                        body: JSON.stringify({ name, main, drink, memo })
+                        body: JSON.stringify({ name, main, drink })
                     });
 
                     orders.push({
                         id: currentId++,
                         name,
-                        status: 'OK',
                         main,
-                        drink: drink === '無' ? '' : drink,
-                        memo
+                        drink: drink === '無' ? '' : drink
                     });
 
                     showToast('✅ 訂單已即時同步到 Google 雲端！');
