@@ -454,34 +454,18 @@
                 const newOrders = [];
                 let rowId = 1;
 
-                // Parse rows starting from row 2 (skipping headers)
-                for (let i = 2; i < data.table.rows.length; i++) {
+                // Parse rows starting from row 1 (skipping headers)
+                for (let i = 1; i < data.table.rows.length; i++) {
                     const cells = data.table.rows[i].c;
                     if (!cells || !cells[1] || !cells[1].v) continue;
 
                     const name = cells[1].v;
                     if (name === '總計' || typeof name !== 'string') continue;
 
-                    const status = (cells[2] && cells[2].v) ? cells[2].v : '';
+                    const main = (cells[2] && cells[2].v) ? cells[2].v : '';
+                    const drink = (cells[3] && cells[3].v) ? cells[3].v : '';
 
-                    let main = '';
-                    for (let m = 0; m < 5; m++) {
-                        if (cells[3 + m] && cells[3 + m].v) { main = mainsList[m]; break; }
-                    }
-
-                    let drink = '';
-                    for (let d = 0; d < 3; d++) {
-                        if (cells[8 + d] && cells[8 + d].v) { drink = drinksList[d]; break; }
-                    }
-
-                    let memo = '';
-                    for (let mIdx = 14; mIdx < cells.length; mIdx++) {
-                        if (cells[mIdx] && cells[mIdx].v && typeof cells[mIdx].v === 'string' && cells[mIdx].v !== 'OK') {
-                            memo = cells[mIdx].v;
-                        }
-                    }
-
-                    newOrders.push({ id: rowId++, name, status, main, drink, memo });
+                    newOrders.push({ id: rowId++, name, status: 'OK', main, drink, memo: '' });
                 }
 
                 orders = newOrders;
