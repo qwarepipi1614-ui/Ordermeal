@@ -549,7 +549,7 @@
             setTimeout(() => { orderForm.reset(); }, 300);
         }
 
-        function handleFormSubmit(e) {
+        async function handleFormSubmit(e) {
             e.preventDefault();
 
             const name = document.getElementById('memberName').value;
@@ -561,22 +561,46 @@
                 const index = orders.findIndex(o => o.id === editingId);
                 if (index !== -1) {
                     orders[index] = { ...orders[index], name, main, drink, memo };
-                    showToast('訂單已更新！');
+                    showToast('訂單已更新！(注意: 目前修改不溯及雲端)');
                 }
+                renderTable();
+                closeModal();
             } else {
-                orders.push({
-                    id: currentId++,
-                    name,
-                    status: 'OK',
-                    main,
-                    drink: drink === '無' ? '' : drink,
-                    memo
-                });
-                showToast('訂單已新增！');
-            }
+                const submitBtn = document.querySelector('#orderForm button[type="submit"]');
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 寫入雲端中...';
 
-            renderTable();
-            closeModal();
+                try {
+                    const postUrl = "https://script.google.com/macros/s/AKfycbxLtvwVeJdYL039MXLsUeLQh27ZOOXfQ0rhiDsGH3xQXgEvq7HEpvoQAHfLBM-oARcS/exec";
+                    await fetch(postUrl, {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        headers: { 'Content-Type': 'text/plain' },
+                        body: JSON.stringify({ name, main, drink, memo })
+                    });
+
+                    orders.push({
+                        id: currentId++,
+                        name,
+                        status: 'OK',
+                        main,
+                        drink: drink === '無' ? '' : drink,
+                        memo
+                    });
+
+                    showToast('✅ 訂單已即時同步到 Google 雲端！');
+                    setTimeout(() => { syncGoogleSheet(); }, 1500);
+
+                } catch (error) {
+                    console.error("寫入雲端失敗", error);
+                    showToast('❌ 雲端寫入發生連線錯誤');
+                } finally {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="fas fa-save"></i> 儲存';
+                    renderTable();
+                    closeModal();
+                }
+            }
         }
 
         function editOrder(id) {
