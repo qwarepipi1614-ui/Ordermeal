@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>點餐系統 後台管理 | OrderMeal Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #6ab04c;
+            --primary-hover: #badc58;
+            --secondary: #e056fd;
+            --danger: #eb4d4b;
+            --danger-hover: #ff7979;
+            --dark: #130f40;
+            --light: #f1f2f6;
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --text-main: #f5f6fa;
+            --text-muted: #dcdde1;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Outfit', 'Microsoft JhengHei', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(-45deg, #130f40, #2c2359, #1b3552, #004d40);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem;
+            overflow-x: hidden;
+        }
+
+        @keyframes gradientBG {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 2rem;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .title-area h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(to right, #6ab04c, #badc58);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+        }
+
+        .title-area p {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+        }
+
+        .btn {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--primary-hover));
+            color: #fff;
+            box-shadow: 0 4px 15px rgba(106, 176, 76, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(106, 176, 76, 0.5);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, var(--danger), var(--danger-hover));
+            color: #fff;
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+        }
+
+        .btn-edit {
+            background: linear-gradient(135deg, #0984e3, #74b9ff);
+            color: #fff;
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+        }
+
+        .table-responsive {
+            overflow-x: auto;
+            border-radius: 12px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        th,
+        td {
+            padding: 1.2rem;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        th {
+            background: rgba(255, 255, 255, 0.05);
+            font-weight: 600;
+            color: #badc58;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        tr {
+            transition: background 0.3s ease;
+        }
+
+        tr:hover {
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        .badge {
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .badge-ok {
+            background: rgba(106, 176, 76, 0.2);
+            color: #badc58;
+            border: 1px solid rgba(106, 176, 76, 0.5);
+        }
+
+        .action-btns {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(5px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal {
+            background: #1e1b4b;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            width: 90%;
+            max-width: 500px;
+            padding: 2rem;
+            transform: translateY(20px) scale(0.95);
+            transition: all 0.3s ease;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-overlay.active .modal {
+            transform: translateY(0) scale(1);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-header h2 {
+            font-size: 1.5rem;
+            color: #fff;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .close-btn:hover {
+            color: var(--danger);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--text-muted);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            color: #fff;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(106, 176, 76, 0.2);
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .form-control option {
+            background: #1e1b4b;
+            color: #fff;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-muted);
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: rgba(106, 176, 76, 0.9);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            z-index: 2000;
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <header>
+            <div class="title-area">
+                <h1><i class="fas fa-utensils"></i> OrderMeal 管理後台</h1>
+                <p>2/6 (五) 點餐統計與維護</p>
+            </div>
+            <div class="header-actions" style="display: flex; gap: 1rem; align-items: center;">
+                <a href="https://github.com/qwarepipi1614" target="_blank" class="btn"
+                    style="background: rgba(255,255,255,0.1); color: #fff; text-decoration: none;">
+                    <i class="fab fa-github"></i> 我的 GitHub
+                </a>
+                <button class="btn btn-primary" onclick="openModal()">
+                    <i class="fas fa-plus"></i> 新增訂單
+                </button>
+            </div>
+        </header>
+
+        <div class="table-responsive">
+            <table id="orderTable">
+                <thead>
+                    <tr>
+                        <th>編號</th>
+                        <th>姓名</th>
+                        <th>狀態</th>
+                        <th>主餐 (四選一/素食)</th>
+                        <th>飲料 (三選一)</th>
+                        <th>備註</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <!-- Data will be populated here by JavaScript -->
+                </tbody>
+            </table>
+            <div id="emptyState" class="empty-state" style="display: none;">
+                <i class="fas fa-inbox fa-3x" style="margin-bottom: 1rem; opacity: 0.5;"></i>
+                <p>目前沒有訂單資料，請點擊上方按鈕新增。</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Add/Edit -->
+    <div class="modal-overlay" id="orderModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 id="modalTitle">新增訂單</h2>
+                <button class="close-btn" onclick="closeModal()"><i class="fas fa-times"></i></button>
+            </div>
+            <form id="orderForm" onsubmit="handleFormSubmit(event)">
+                <input type="hidden" id="orderId">
+                <div class="form-group">
+                    <label for="memberName">姓名 *</label>
+                    <input type="text" id="memberName" class="form-control" required placeholder="請輸入姓名">
+                </div>
+                <div class="form-group">
+                    <label for="mainDish">主餐選項 *</label>
+                    <select id="mainDish" class="form-control" required>
+                        <option value="" disabled selected>請選擇主餐</option>
+                        <option value="油蔥舒肥雞霸氣會議餐盒">油蔥舒肥雞霸氣會議餐盒</option>
+                        <option value="爺爺蒲燒魚霸氣會議餐盒">爺爺蒲燒魚霸氣會議餐盒</option>
+                        <option value="招牌椒麻豬排霸氣會議餐盒">招牌椒麻豬排霸氣會議餐盒</option>
+                        <option value="原味椒鹽炸雞霸氣會議餐盒">原味椒鹽炸雞霸氣會議餐盒</option>
+                        <option value="素食">素食</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="drinkSelect">飲料選項</label>
+                    <select id="drinkSelect" class="form-control">
+                        <option value="無">無</option>
+                        <option value="桂香青檸粉粿 無糖微冰">桂香青檸粉粿 無糖微冰</option>
+                        <option value="珍珠大正紅茶拿鐵微糖微冰">珍珠大正紅茶拿鐵 微糖微冰</option>
+                        <option value="原片初露青茶 無糖微冰">原片初露青茶 無糖微冰</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="orderMemo">備註</label>
+                    <input type="text" id="orderMemo" class="form-control" placeholder="個人特殊需求 (選填)">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">取消</button>
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> 儲存</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="toast" class="toast">操作成功！</div>
+
+    <script>
+        // Initial mocked data based on Google Sheet structure
+        let orders = [
+            { id: 1, name: '高念平', status: 'OK', main: '油蔥舒肥雞霸氣會議餐盒', drink: '原片初露青茶 無糖微冰', memo: '冬天不洗澡也要洗衣服吧' },
+            { id: 2, name: '游國楷', status: 'OK', main: '油蔥舒肥雞霸氣會議餐盒', drink: '原片初露青茶 無糖微冰', memo: '' },
+            { id: 3, name: '謝楷評', status: 'OK', main: '招牌椒麻豬排霸氣會議餐盒', drink: '珍珠大正紅茶拿鐵微糖微冰', memo: '' },
+            { id: 4, name: '陳春惠', status: 'OK', main: '原味椒鹽炸雞霸氣會議餐盒', drink: '桂香青檸粉粿 無糖微冰', memo: '' },
+            { id: 7, name: '李佳馨', status: 'OK', main: '原味椒鹽炸雞霸氣會議餐盒', drink: '桂香青檸粉粿 無糖微冰', memo: '都AI' }
+        ];
+
+        let currentId = 8; // Next available ID
+        let editingId = null;
+
+        const tableBody = document.getElementById('tableBody');
+        const emptyState = document.getElementById('emptyState');
+        const orderModal = document.getElementById('orderModal');
+        const orderForm = document.getElementById('orderForm');
+        const modalTitle = document.getElementById('modalTitle');
+
+        function renderTable() {
+            tableBody.innerHTML = '';
+
+            if (orders.length === 0) {
+                emptyState.style.display = 'block';
+                document.getElementById('orderTable').style.display = 'none';
+                return;
+            }
+
+            emptyState.style.display = 'none';
+            document.getElementById('orderTable').style.display = 'table';
+
+            orders.forEach((order, index) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>#${order.id}</td>
+                    <td><strong>${order.name}</strong></td>
+                    <td><span class="badge badge-ok">${order.status}</span></td>
+                    <td>${order.main}</td>
+                    <td>${order.drink || '無'}</td>
+                    <td>${order.memo || '-'}</td>
+                    <td class="action-btns">
+                        <button class="btn btn-edit" onclick="editOrder(${order.id})" title="編輯">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-danger" onclick="deleteOrder(${order.id})" title="刪除">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+                tableBody.appendChild(tr);
+            });
+        }
+
+        function openModal(id = null) {
+            editingId = id;
+            if (id) {
+                const order = orders.find(o => o.id === id);
+                document.getElementById('memberName').value = order.name;
+                document.getElementById('mainDish').value = order.main;
+                document.getElementById('drinkSelect').value = order.drink || '無';
+                document.getElementById('orderMemo').value = order.memo;
+                modalTitle.innerHTML = '<i class="fas fa-edit"></i> 編輯訂單';
+            } else {
+                orderForm.reset();
+                modalTitle.innerHTML = '<i class="fas fa-plus"></i> 新增訂單';
+            }
+            orderModal.classList.add('active');
+        }
+
+        function closeModal() {
+            orderModal.classList.remove('active');
+            setTimeout(() => { orderForm.reset(); }, 300);
+        }
+
+        function handleFormSubmit(e) {
+            e.preventDefault();
+
+            const name = document.getElementById('memberName').value;
+            const main = document.getElementById('mainDish').value;
+            const drink = document.getElementById('drinkSelect').value;
+            const memo = document.getElementById('orderMemo').value;
+
+            if (editingId) {
+                const index = orders.findIndex(o => o.id === editingId);
+                if (index !== -1) {
+                    orders[index] = { ...orders[index], name, main, drink, memo };
+                    showToast('訂單已更新！');
+                }
+            } else {
+                orders.push({
+                    id: currentId++,
+                    name,
+                    status: 'OK',
+                    main,
+                    drink: drink === '無' ? '' : drink,
+                    memo
+                });
+                showToast('訂單已新增！');
+            }
+
+            renderTable();
+            closeModal();
+        }
+
+        function editOrder(id) {
+            openModal(id);
+        }
+
+        function deleteOrder(id) {
+            if (confirm('確定要刪除這筆訂單嗎？')) {
+                orders = orders.filter(o => o.id !== id);
+                renderTable();
+                showToast('訂單已刪除！');
+            }
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // Initialize display
+        renderTable();
+    </script>
+</body>
+
+</html>
